@@ -1,11 +1,15 @@
-﻿using System;
-using System.Linq;
+﻿// Program: Tic Tac Toe
+// Author: Aaron Fox
 
 namespace cse_210_01
 {
-    internal class Program
+
+    using System;
+    using System.Linq;
+
+    public class Program
     {
-        public enum Player
+        enum Player
         {
             Undefined,
             X,
