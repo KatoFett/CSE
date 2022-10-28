@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace CSE_210
+namespace cse_210_01
 {
     internal class Program
     {
