@@ -1,7 +1,7 @@
 ﻿// Program: Tic Tac Toe
 // Author: Aaron Fox
 
-namespace cse_210_01
+namespace CSE_210_01.TicTacToe
 {
 
     using System;
