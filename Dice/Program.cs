@@ -1,4 +1,4 @@
-﻿namespace CSE_210_01.Dice
+﻿namespace Dice
 {
     /// <summary>
     /// Initiates and manages a game of Dice.
