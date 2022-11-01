@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Hilo
+﻿namespace Hilo
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// A manager for handling a deck of <see cref="Card"/>s.
     /// </summary>
