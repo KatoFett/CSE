@@ -6,7 +6,7 @@ If you don't roll any 1's or 5's, the game is over!
 
 ## Getting Started
 Make sure you have .NET version 6.0.0 or later installed. Navigate
-to the game directory and open an instance of comman prompt. Run the
+to the game directory and open an instance of command prompt. Run the
 following command:
 
 dotnet run

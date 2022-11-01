@@ -3,7 +3,7 @@
     using System;
 
     /// <summary>
-    /// Represents a virtual die.
+    /// Represents a virtual 6-sided die.
     /// </summary>
     internal class Die
     {
