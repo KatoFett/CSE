@@ -21,9 +21,9 @@ root
 +--Greed.csproj     (.NET project file)
 +--GreedScene.cs    (Main window
 +--Program.cs       (Program entry point)
++--README.md        (Readme file)
 +--Raylib-cs.dll    (Raylib C# assembly - automatically copied during build)
 +--raylib.dll       (Raylib assembly - automatically copied during build)
-+--README.md        (Readme file)
 ```
 
 ## Required Technologies
