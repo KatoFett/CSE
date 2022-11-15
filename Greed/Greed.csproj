@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <Reference Include="Raylib-cs">
-      <HintPath>..\Raylib-cs.dll</HintPath>
+      <HintPath>Raylib-cs.dll</HintPath>
     </Reference>
   </ItemGroup>
 
