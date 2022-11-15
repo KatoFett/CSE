@@ -2,25 +2,84 @@
 using Raylib_cs;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Numerics;
 
 namespace GameEngine
 {
     /// <summary>
     /// A 2D game utilizing the engine.
     /// </summary>
-    public abstract class Scene
+    public abstract class Scene : IDisposable
     {
-        public Scene(string title, int width, int height, Color background, int fps)
+        public Scene(string title, Vector2 size, Color background, int fps)
         {
             if (_ActiveScene != null)
                 throw new InvalidOperationException("Cannot instantiate multiple scenes.");
 
             _ActiveScene = this;
-            VideoService = new VideoService(title, width, height, background, fps);
+            Size = size;
+            VideoService = new VideoService(title, size, background, fps);
+            VideoService.Initialize();
+            AudioService.Initialize();
+            AudioService.LoadSounds(Path.Combine(AssetsDirectory, "sounds"));
+            FontService.LoadFonts(Path.Combine(AssetsDirectory, "fonts"));
+            VideoService.LoadImages(Path.Combine(AssetsDirectory, "images"));
         }
+
+        // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        ~Scene()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        #region IDisposable
+
+        private bool disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    AudioService.Release();
+                    AudioService.UnloadSounds();
+                    FontService.UnloadFonts();
+                    VideoService.UnloadImages();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
 
         public static Scene ActiveScene => _ActiveScene ?? throw new Exception("No active scene exists.");
         private static Scene? _ActiveScene;
+
+        public static string AssetsDirectory { get; } = Path.Combine(Environment.CurrentDirectory, "assets");
+
+        /// <summary>
+        /// Gets a <see cref="Vector2"/> representing the size in pixels of the scene.
+        /// </summary>
+        public Vector2 Size { get; }
+
+        /// <summary>
+        /// Gets the time in seconds from the last frame draw.
+        /// </summary>
+        public static float DeltaTime => Raylib.GetFrameTime();
 
         protected VideoService VideoService { get; }
 
@@ -30,28 +89,37 @@ namespace GameEngine
         internal List<GameObject> GameObjects { get; } = new();
 
         /// <summary>
+        /// Gets all GameObjects that are marked for disposal.
+        /// </summary>
+        internal List<GameObject> DisposedGameObjects { get; } = new();
+
+        /// <summary>
         /// Runs the game.
         /// </summary>
         public void Run()
         {
-            VideoService.Initialize();
             while (VideoService.IsWindowOpen())
             {
-                RenderFrame();
+                Update();
             }
         }
 
         /// <summary>
         /// Processes and renders a frame to the screen.
         /// </summary>
-        public void RenderFrame()
+        public virtual void Update()
         {
             VideoService.BeginFrame();
-            foreach (var gameObj in GameObjects)
+            foreach (var gameObj in GameObjects.OrderBy(g => g.ZIndex))
             {
                 gameObj.Update();
                 gameObj.Draw(VideoService);
             }
+            foreach (var gameObj in DisposedGameObjects)
+            {
+                GameObjects.Remove(gameObj);
+            }
+            VideoService.EndFrame();
         }
     }
 }

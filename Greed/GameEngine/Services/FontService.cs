@@ -19,7 +19,7 @@ namespace GameEngine.Services
             foreach (string filepath in filepaths)
             {
                 var font = Raylib.LoadFont(filepath);
-                var filename = Path.GetFileNameWithoutExtension(filepath).ToLower();
+                var filename = Path.GetFileNameWithoutExtension(filepath);
                 _Fonts[filename] = font;
             }
         }

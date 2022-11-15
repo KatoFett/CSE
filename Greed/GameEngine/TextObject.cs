@@ -9,13 +9,6 @@ namespace GameEngine
     /// </summary>
     public class TextObject : GameObject
     {
-        public enum Alignment
-        {
-            Left,
-            Center,
-            Right,
-        }
-
         /// <summary>
         /// Creates a new instance of an empty <see cref="TextObject"/>.
         /// </summary>
@@ -43,6 +36,13 @@ namespace GameEngine
 
         #endregion
 
+        public enum Alignment
+        {
+            Left,
+            Center,
+            Right,
+        }
+
         /// <summary>
         /// Gets or sets the default font for all TextObjects.
         /// </summary>
@@ -65,7 +65,7 @@ namespace GameEngine
         /// <summary>
         /// Gets or sets the color of this <see cref="TextObject"/>.
         /// </summary>
-        public Color Color { get; set; } = Color.BLACK;
+        public Color FontColor { get; set; } = Color.BLACK;
 
         /// <summary>
         /// Gets or sets the font size of this <see cref="TextObject"/>.

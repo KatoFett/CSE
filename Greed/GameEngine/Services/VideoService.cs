@@ -1,5 +1,8 @@
-﻿using Raylib_cs;
+﻿using GameEngine;
+using Raylib_cs;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 
 namespace GameEngine.Services
@@ -8,17 +11,15 @@ namespace GameEngine.Services
     public class VideoService
     {
         private Color _Background;
-        private readonly int _Height;
-        private readonly int _Width;
+        private readonly Vector2 _Size;
         private readonly string _Title;
-        private readonly Dictionary<string, Texture2D> _Textures = new();
+        private static readonly Dictionary<string, Texture2D> _Textures = new();
         private readonly int _FPS;
 
-        public VideoService(string title, int width, int height, Color backgroundColor, int fps)
+        public VideoService(string title, Vector2 size, Color backgroundColor, int fps)
         {
             _Title = title;
-            _Width = width;
-            _Height = height;
+            _Size = size;
             _Background = backgroundColor;
             _FPS = fps;
         }
@@ -30,7 +31,7 @@ namespace GameEngine.Services
         /// </summary>
         public void Initialize()
         {
-            Raylib.InitWindow(_Width, _Height, _Title);
+            Raylib.InitWindow(_Size.X.ToInt(), _Size.Y.ToInt(), _Title);
             Raylib.SetTargetFPS(_FPS);
         }
 
@@ -86,7 +87,8 @@ namespace GameEngine.Services
             foreach (string filepath in filepaths)
             {
                 var texture = Raylib.LoadTexture(filepath);
-                _Textures[filepath] = texture;
+                var filename = Path.GetFileNameWithoutExtension(filepath);
+                _Textures[filename] = texture;
             }
         }
 
@@ -103,17 +105,30 @@ namespace GameEngine.Services
         }
 
         /// <summary>
+        /// Gets a <see cref="Texture2D"/> with the given <paramref name="name"/>.
+        /// </summary>
+        /// <param name="name">The name of the texture.</param>
+        /// <returns>The <see cref="Texture2D"/> found.</returns>
+        /// <exception cref="KeyNotFoundException"></exception>
+        public static Texture2D GetTexture(string name)
+        {
+            if (!_Textures.ContainsKey(name))
+                throw new KeyNotFoundException($"Could not locate a texture with the name '{name}'.");
+            return _Textures[name];
+        }
+
+        /// <summary>
         /// Draws an image on the screen
         /// </summary>
         /// <param name="image">The image to draw.</param>
-        /// <param name="position">The position of the image's lower-left corner.</param>
+        /// <param name="position">The position of the image's top-left corner.</param>
         public void DrawImage(Sprite sprite)
         {
             if (!_Textures.ContainsKey(sprite.TextureName))
-                throw new KeyNotFoundException($"Unable to find a texture with the name '${sprite.TextureName}'.");
+                throw new KeyNotFoundException($"Unable to find a texture with the name '{sprite.TextureName}'.");
 
             var texture = _Textures[sprite.TextureName];
-            Raylib.DrawTexture(texture, sprite.Position.X, sprite.Position.Y, Color.WHITE);
+            Raylib.DrawTexture(texture, sprite.Position.X.ToInt(), sprite.Position.Y.ToInt(), sprite.Tint);
         }
 
         /// <summary>
@@ -123,12 +138,12 @@ namespace GameEngine.Services
         /// <param name="position">The position of the rectangle's top-left corner.</param>
         /// <param name="color">The color of the rectangle.</param>
         /// <param name="filled">Whether the rectangle is filled or hollow.</param>
-        public void DrawRectangle(Vector2D size, Vector2D position, Color color, bool filled = false)
+        public void DrawRectangle(Vector2 size, Vector2 position, Color color, bool filled = false)
         {
             if (filled)
-                Raylib.DrawRectangle(position.X, position.Y, size.X, size.Y, color);
+                Raylib.DrawRectangle(position.X.ToInt(), position.Y.ToInt(), size.X.ToInt(), size.Y.ToInt(), color);
             else
-                Raylib.DrawRectangleLines(position.X, position.Y, size.X, size.Y, color);
+                Raylib.DrawRectangleLines(position.X.ToInt(), position.Y.ToInt(), size.X.ToInt(), size.Y.ToInt(), color);
         }
 
         /// <summary>
@@ -138,12 +153,12 @@ namespace GameEngine.Services
         /// <param name="radius">The radius of the circle.</param>
         /// <param name="color">The color of the circlle.</param>
         /// <param name="filled">Whether the circle is filled or hollow.</param>
-        public void DrawCircle(Vector2D position, float radius, Color color, bool filled = false)
+        public void DrawCircle(Vector2 position, float radius, Color color, bool filled = false)
         {
             if (filled)
-                Raylib.DrawCircle(position.X, position.Y, radius, color);
+                Raylib.DrawCircle(position.X.ToInt(), position.Y.ToInt(), radius, color);
             else
-                Raylib.DrawCircleLines(position.X, position.Y, radius, color);
+                Raylib.DrawCircleLines(position.X.ToInt(), position.Y.ToInt(), radius, color);
         }
 
         #endregion
@@ -159,7 +174,7 @@ namespace GameEngine.Services
         {
             var offset = text.GetXOffset();
             Vector2 vector = new(text.Position.X + offset, text.Position.Y);
-            Raylib.DrawTextEx(text.Font, text.Text, vector, text.FontSize, text.FontSpacing, text.Color);
+            Raylib.DrawTextEx(text.Font, text.Text, vector, text.FontSize, text.FontSpacing, text.FontColor);
         }
 
         #endregion

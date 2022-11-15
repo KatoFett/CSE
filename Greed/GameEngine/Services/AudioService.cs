@@ -30,7 +30,8 @@ namespace GameEngine.Services
             foreach (string filepath in filepaths)
             {
                 var sound = Raylib.LoadSound(filepath);
-                _Sounds[filepath] = sound;
+                var filename = Path.GetFileNameWithoutExtension(filepath);
+                _Sounds[filename] = sound;
             }
         }
 
@@ -43,6 +44,9 @@ namespace GameEngine.Services
             if (_Sounds.ContainsKey(sound.Filename))
             {
                 var raylibSound = _Sounds[sound.Filename];
+                Raylib.SetSoundVolume(raylibSound, sound.Volume);
+                Raylib.SetSoundPan(raylibSound, sound.Pan);
+                Raylib.SetSoundPitch(raylibSound, sound.Pitch);
                 Raylib.PlaySound(raylibSound);
             }
         }

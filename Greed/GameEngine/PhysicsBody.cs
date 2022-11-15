@@ -1,4 +1,6 @@
 ﻿using Raylib_cs;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace GameEngine
 {
@@ -10,18 +12,18 @@ namespace GameEngine
         /// <summary>
         /// Creates a new instance of a <see cref="PhysicsBody".
         /// </summary>
-        /// <param name="position">The initial position</param>
-        /// <param name="size">The initial size</param>
-        public PhysicsBody(Vector2D position, Vector2D size)
+        /// <param name="position">The initial position.</param>
+        /// <param name="size">The initial size.</param>
+        public PhysicsBody(Vector2 size, Vector2 position)
         {
-            Position = position;
             Size = size;
+            Position = position;
         }
 
         /// <summary>
-        /// Gets or sets the body's size.
+        /// Gets or sets the body's size in pixels relative to the top-left corner.
         /// </summary>
-        public Vector2D Size { get; set; }
+        public Vector2 Size { get; set; }
 
         /// <summary>
         /// Gets a <see cref="Rectangle"/> representing the size and position of the body.
@@ -41,6 +43,21 @@ namespace GameEngine
             Rectangle rect1 = ToRectangle();
             Rectangle rect2 = body.ToRectangle();
             return Raylib.CheckCollisionRecs(rect1, rect2);
+        }
+
+        /// <summary>
+        /// Gets all bodies that are currently colliding with this <see cref="PhysicsBody"/>.
+        /// </summary>
+        /// <returns>A list of all bodies in collision with this <see cref="PhysicsBody"/>.</returns>
+        public List<PhysicsBody> GetAllCollisions()
+        {
+            var retval = new List<PhysicsBody>();
+            foreach (var gameObject in Scene.ActiveScene.GameObjects)
+            {
+                if(gameObject != this && gameObject is PhysicsBody body && IsCollidingWith(body))
+                    retval.Add(body);
+            }
+            return retval;
         }
     }
 }

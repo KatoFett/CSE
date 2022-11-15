@@ -1,4 +1,9 @@
-﻿namespace GameEngine.Services
+﻿using GameEngine;
+using GameEngine.Services;
+using Raylib_cs;
+using System.Numerics;
+
+namespace GameEngine
 {
     /// <summary>
     /// An image or texture with a position.
@@ -11,9 +16,11 @@
         /// <param name="textureName">The name of the texture.</param>
         /// <param name="size">The size of the sprite for physics.</param>
         /// <param name="position">The initial location of the sprite.</param>
-        public Sprite(string textureName, Vector2D size, Vector2D position) : base(size, position)
+        public Sprite(string textureName) : base(Vector2.Zero, Vector2.Zero)
         {
             TextureName = textureName;
+            var texture = VideoService.GetTexture(textureName);
+            Size = new Vector2(texture.width, texture.height);
         }
 
         #region GameObject
@@ -26,8 +33,13 @@
         #endregion
 
         /// <summary>
-        /// Gets or sets the name of the Sprite's texture.
+        /// Gets or sets the name of the sprite's texture.
         /// </summary>
         public string TextureName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tint applied to the sprite's texture.
+        /// </summary>
+        public Color Tint { get; set; } = Color.WHITE;
     }
 }

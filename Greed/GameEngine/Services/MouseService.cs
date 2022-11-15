@@ -1,4 +1,5 @@
 ﻿using Raylib_cs;
+using System.Numerics;
 
 namespace GameEngine.Services
 {
@@ -10,11 +11,11 @@ namespace GameEngine.Services
         /// <summary>
         /// Gets the coordinates of the mouse cursor.
         /// </summary>
-        public static Vector2D GetMouseCoordinates()
+        public static Vector2 GetMouseCoordinates()
         {
             int x = Raylib.GetMouseX();
             int y = Raylib.GetMouseY();
-            return new Vector2D(x, y);
+            return new Vector2(x, y);
         }
 
         /// <summary>
