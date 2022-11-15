@@ -30,6 +30,12 @@ root
 
  - .NET 6.0.0 or greater
 
+## Credits
+
+ - Game engine derived from BYU-I CSE 210
+   
+   https://github.com/byui-cse/cse210-student-articulate-csharp-complete
+
 ## Authors
 
 Aaron Fox
