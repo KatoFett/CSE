@@ -19,10 +19,10 @@ root
    +--Services      (Folder containing GameEngine services such as keyboard/audio)
 +--assets           (Folder containing images/audio/fonts specific to the game - automatically copied during build)
 +--Greed.csproj     (.NET project file)
-+--GreedScene.cs    (Main window
++--GreedScene.cs    (Main window)
 +--Program.cs       (Program entry point)
 +--README.md        (Readme file)
-+--Raylib-cs.dll    (Raylib C# assembly - automatically copied during build)
++--Raylib-cs.dll    (Raylib C# assembly)
 +--raylib.dll       (Raylib assembly - automatically copied during build)
 ```
 
