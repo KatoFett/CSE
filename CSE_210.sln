@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jumper", "Jumper\Jumper.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Greed", "Greed\Greed.csproj", "{C7AFA015-19A9-45E5-8AF0-88CA72A6205A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cycle", "Cycle\Cycle.csproj", "{1276B5F5-9B76-4784-B11A-4263469E6712}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{C7AFA015-19A9-45E5-8AF0-88CA72A6205A}.Debug|Any CPU.Build.0 = Debug|x64
 		{C7AFA015-19A9-45E5-8AF0-88CA72A6205A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7AFA015-19A9-45E5-8AF0-88CA72A6205A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1276B5F5-9B76-4784-B11A-4263469E6712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1276B5F5-9B76-4784-B11A-4263469E6712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1276B5F5-9B76-4784-B11A-4263469E6712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1276B5F5-9B76-4784-B11A-4263469E6712}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
