@@ -1,8 +1,10 @@
-﻿using GameEngine.Services;
-using Raylib_cs;
+﻿using Raylib_cs;
 
 namespace Cycle
 {
+    /// <summary>
+    /// The bike controlled by player 1.
+    /// </summary>
     public class Bike1 : Bike
     {
         public override KeyboardKey LeftKey => KeyboardKey.KEY_A;
