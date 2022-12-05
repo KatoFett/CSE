@@ -1,12 +1,12 @@
 ﻿using Raylib_cs;
 
 
-namespace GameEngine.Services
+namespace GameEngine
 {
     /// <summary>
     /// Service for interacting with the keyboard.
     /// </summary>
-    public static class KeyboardService
+    public static class Keyboard
     {
         /// <summary>
         /// Gets whether a keyboard key is currently held down.

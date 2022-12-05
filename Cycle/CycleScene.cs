@@ -8,6 +8,9 @@ using System.Numerics;
 
 namespace Cycle
 {
+    /// <summary>
+    /// The main scene.
+    /// </summary>
     public class CycleScene : Scene
     {
         public CycleScene() : base("Cycle", new Vector2(640, 480), Color.BLACK, 60)
@@ -95,7 +98,7 @@ namespace Cycle
 
             if (_IsGameOver)
             {
-                if (KeyboardService.IsKeyPressed(KeyboardKey.KEY_SPACE))
+                if (Keyboard.IsKeyPressed(KeyboardKey.KEY_SPACE))
                 {
                     _IsGameOver = false;
                     StartLabel.IsVisible = false;
@@ -125,6 +128,10 @@ namespace Cycle
             }
         }
 
+        /// <summary>
+        /// Registers when a bike rotates to remember the wall.
+        /// </summary>
+        /// <param name="bike">The bike that has turned.</param>
         public void RegisterBikeRotation(Bike bike)
         {
             var turnsList = bike is Bike1 ? Bike1Turns : Bike2Turns;
@@ -134,6 +141,12 @@ namespace Cycle
             WallRects.Add(GetWallRect(previousTurn, nextTurn));
         }
 
+        /// <summary>
+        /// Gets a rectangle containing the entire wall.
+        /// </summary>
+        /// <param name="pos1">The start position of the wall.</param>
+        /// <param name="pos2">The end position of the wall.</param>
+        /// <returns>A <see cref="Rectangle"/> whose dimensions match the drawn wall.</returns>
         private static Rectangle GetWallRect(Vector2 pos1, Vector2 pos2)
         {
             var rectX = MathF.Min(pos1.X, pos2.X);
@@ -142,6 +155,12 @@ namespace Cycle
             return rect;
         }
 
+        /// <summary>
+        /// Draws a bike's wall on the screen.
+        /// </summary>
+        /// <param name="bike">The bike that created the wall.</param>
+        /// <param name="pos1">The start position of the wall.</param>
+        /// <param name="pos2">The end position of the wall.</param>
         private static void DrawBikeWall(Bike bike, Vector2 pos1, Vector2 pos2)
         {
             Raylib.DrawLineEx(pos1, pos2, 9f, new Color(255, 255, 255, 7));
@@ -150,6 +169,10 @@ namespace Cycle
             Raylib.DrawLineEx(pos1, pos2, 3f, bike.Color);
         }
 
+        /// <summary>
+        /// Gets the rectangles for every wall on the screen.
+        /// </summary>
+        /// <returns>A list containing a <see cref="Rectangle"/> for every wall drawn by the bikes.</returns>
         public List<Rectangle> GetAllWallRects()
         {
             var result = new List<Rectangle>(WallRects);
@@ -157,20 +180,23 @@ namespace Cycle
             return result;
         }
 
+        /// <summary>
+        /// Ends the game and gives a point to the other bike.
+        /// </summary>
+        /// <param name="caller">The bike that crashed.</param>
         public void EndGame(Bike caller)
         {
             _IsGameOver = true;
             StartLabel.IsVisible = true;
             if (caller is Bike1)
-            {
                 Player2Score++;
-            }
             else
-            {
                 Player1Score++;
-            }
         }
 
+        /// <summary>
+        /// Resets the game to the original starting position. Score is not affected.
+        /// </summary>
         public void Reset()
         {
             StartLabelGlow = StartLabelGlowLength;

@@ -1,10 +1,12 @@
 ﻿using GameEngine;
-using GameEngine.Services;
 using Raylib_cs;
 using System.Linq;
 
 namespace Cycle
 {
+    /// <summary>
+    /// A bike in the game.
+    /// </summary>
     public abstract class Bike : Sprite
     {
         protected Bike() : base("bike")
@@ -22,12 +24,34 @@ namespace Cycle
 
         public readonly float Speed = 160f;
 
+        /// <summary>
+        /// Gets or sets the bike's current direction of travel.
+        /// </summary>
         public Direction CurrentDirection { get; set; } = Direction.Up;
 
+        /// <summary>
+        /// Gets the key to travel left.
+        /// </summary>
         public abstract KeyboardKey LeftKey { get; }
+
+        /// <summary>
+        /// Gets the key to travel right.
+        /// </summary>
         public abstract KeyboardKey RightKey { get; }
+
+        /// <summary>
+        /// Gets the key to travel up.
+        /// </summary>
         public abstract KeyboardKey UpKey { get; }
+
+        /// <summary>
+        /// Gets the key to travel down.
+        /// </summary>
         public abstract KeyboardKey DownKey { get; }
+
+        /// <summary>
+        /// Gets the bike's color.
+        /// </summary>
         public abstract Color Color { get; }
 
         protected internal override void Update()
@@ -35,22 +59,22 @@ namespace Cycle
             var scene = (CycleScene)Scene.ActiveScene;
             if (scene.IsGameOver) return;
 
-            if (KeyboardService.IsKeyPressed(LeftKey) && CurrentDirection != Direction.Right)
+            if (Keyboard.IsKeyPressed(LeftKey) && CurrentDirection != Direction.Right)
             {
                 CurrentDirection = Direction.Left;
                 scene.RegisterBikeRotation(this);
             }
-            else if (KeyboardService.IsKeyPressed(RightKey) && CurrentDirection != Direction.Left)
+            else if (Keyboard.IsKeyPressed(RightKey) && CurrentDirection != Direction.Left)
             {
                 CurrentDirection = Direction.Right;
                 scene.RegisterBikeRotation(this);
             }
-            else if (KeyboardService.IsKeyPressed(UpKey) && CurrentDirection != Direction.Down)
+            else if (Keyboard.IsKeyPressed(UpKey) && CurrentDirection != Direction.Down)
             {
                 CurrentDirection = Direction.Up;
                 scene.RegisterBikeRotation(this);
             }
-            else if (KeyboardService.IsKeyPressed(DownKey) && CurrentDirection != Direction.Up)
+            else if (Keyboard.IsKeyPressed(DownKey) && CurrentDirection != Direction.Up)
             {
                 CurrentDirection = Direction.Down;
                 scene.RegisterBikeRotation(this);
@@ -59,15 +83,18 @@ namespace Cycle
             var rotation = (int)CurrentDirection * 90f;
             var rotationVector = rotation.ToRotationVector();
 
-            if(!scene.IsGameOver)
+            // Move bike forward.
+            if (!scene.IsGameOver)
                 Translate(rotationVector * Speed * Scene.DeltaTime);
 
+            // If bike runs into border.
             if (Position.X <= 0
                 || (Position.X + Size.X) >= Scene.ActiveScene.Size.X
                 || Position.Y <= 0
                 || (Position.Y + Size.Y) >= Scene.ActiveScene.Size.Y)
                 scene.EndGame(this);
 
+            // Check for any wall collisions.
             var walls = scene.GetAllWallRects();
             var thisRect = ToRectangle();
             switch (CurrentDirection)

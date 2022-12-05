@@ -1,12 +1,12 @@
 ﻿using Raylib_cs;
 using System.Numerics;
 
-namespace GameEngine.Services
+namespace GameEngine
 {
     /// <summary>
     /// Service for interacting with the mouse.
     /// </summary>
-    public static class MouseService
+    public static class Mouse
     {
         /// <summary>
         /// Gets the coordinates of the mouse cursor.
