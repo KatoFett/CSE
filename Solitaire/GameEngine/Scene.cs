@@ -1,6 +1,6 @@
-﻿using GameEngine.Services;
-using Raylib_cs;
+﻿using Raylib_cs;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +11,7 @@ namespace GameEngine
     /// <summary>
     /// A 2D game utilizing the engine.
     /// </summary>
-    public abstract class Scene : IDisposable
+    public abstract partial class Scene : IDisposable
     {
         public Scene(string title, Vector2 size, Color background, int fps)
         {
@@ -111,15 +111,48 @@ namespace GameEngine
         /// </summary>
         public virtual void Update()
         {
+            var mouseCords = MouseService.GetMouseCoordinates();
+            var mouseHit = GetObjectAtPosition(mouseCords);
+
+            // Mouse interaction.
+            if (mouseHit != null)
+            {
+                mouseHit.OnMouseOver();
+                if (MouseService.IsButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+                {
+                    mouseHit.OnMouseDown();
+                }
+                if (MouseService.IsButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
+                {
+                    mouseHit.OnMouseUp();
+                }
+            }
+
+            // Draw objects.
             foreach (var gameObj in GameObjects.Where(g => g.IsVisible).OrderBy(g => g.ZIndex))
             {
                 gameObj.Update();
                 gameObj.Draw(VideoService);
             }
+
+            // Dispose objects.
             foreach (var gameObj in DisposedGameObjects)
             {
                 GameObjects.Remove(gameObj);
             }
+        }
+
+        public PhysicsBody? GetObjectAtPosition(Vector2 position, int maxZIndex = int.MaxValue)
+        {
+            PhysicsBody? physicsBody = null;
+            foreach (PhysicsBody gameObj in GameObjects.Where(g => g is PhysicsBody && g.IsVisible && g.ZIndex <= maxZIndex).OrderBy(g => g.ZIndex))
+            {
+                if (Raylib.CheckCollisionPointRec(position, gameObj.ToRectangle()))
+                {
+                    physicsBody = gameObj;
+                }
+            }
+            return physicsBody;
         }
     }
 }

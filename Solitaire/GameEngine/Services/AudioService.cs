@@ -2,7 +2,7 @@
 using System.IO;
 using Raylib_cs;
 
-namespace GameEngine.Services
+namespace GameEngine
 {
     /// <summary>
     /// Service for playing audio.

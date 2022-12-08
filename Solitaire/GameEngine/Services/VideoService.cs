@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
-namespace GameEngine.Services
+namespace GameEngine
 {
 #pragma warning disable CA1822 // Mark members as static
     public class VideoService

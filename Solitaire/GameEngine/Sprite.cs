@@ -1,6 +1,4 @@
-﻿using GameEngine;
-using GameEngine.Services;
-using Raylib_cs;
+﻿using Raylib_cs;
 using System.Numerics;
 
 namespace GameEngine

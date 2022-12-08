@@ -1,5 +1,4 @@
-﻿using GameEngine.Services;
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace GameEngine
@@ -72,6 +71,9 @@ namespace GameEngine
         /// <summary>
         /// Called once per frame.
         /// </summary>
+        /// <remarks>
+        /// base.Update() does nothing.
+        /// </remarks>
         protected internal virtual void Update() { }
 
         /// <summary>

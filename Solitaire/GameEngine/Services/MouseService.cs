@@ -1,7 +1,7 @@
 ﻿using Raylib_cs;
 using System.Numerics;
 
-namespace GameEngine.Services
+namespace GameEngine
 {
     /// <summary>
     /// Service for interacting with the mouse.

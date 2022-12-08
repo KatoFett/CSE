@@ -1,7 +1,7 @@
 ﻿using Raylib_cs;
 
 
-namespace GameEngine.Services
+namespace GameEngine
 {
     /// <summary>
     /// Service for interacting with the keyboard.

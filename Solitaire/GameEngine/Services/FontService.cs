@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace GameEngine.Services
+namespace GameEngine
 {
     public static class FontService
     {

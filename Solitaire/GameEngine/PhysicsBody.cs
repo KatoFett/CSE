@@ -68,5 +68,9 @@ namespace GameEngine
             var result = Position + Size / 2;
             return result;
         }
+
+        protected internal virtual void OnMouseDown() { }
+        protected internal virtual void OnMouseUp() { }
+        protected internal virtual void OnMouseOver() { }
     }
 }
