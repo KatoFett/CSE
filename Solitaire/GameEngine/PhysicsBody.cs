@@ -1,6 +1,8 @@
 ﻿using Raylib_cs;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Timers;
 
 namespace GameEngine
 {
@@ -18,7 +20,16 @@ namespace GameEngine
         {
             Size = size;
             Position = position;
+            _ClickTimer.Elapsed += (_, _) =>
+            {
+                _IsClickTimerStarted = false;
+                _ClickTimer.Stop();
+            };
         }
+
+        private const double DOUBLE_CLICK_TIME = 500d;
+        private readonly Timer _ClickTimer = new(DOUBLE_CLICK_TIME);
+        private bool _IsClickTimerStarted;
 
         /// <summary>
         /// Gets or sets the body's size in pixels relative to the top-left corner.
@@ -54,7 +65,7 @@ namespace GameEngine
             var retval = new List<PhysicsBody>();
             foreach (var gameObject in Scene.ActiveScene.GameObjects)
             {
-                if(gameObject != this && gameObject is PhysicsBody body && IsCollidingWith(body))
+                if (gameObject != this && gameObject is PhysicsBody body && IsCollidingWith(body))
                     retval.Add(body);
             }
             return retval;
@@ -72,5 +83,28 @@ namespace GameEngine
         protected internal virtual void OnMouseDown() { }
         protected internal virtual void OnMouseUp() { }
         protected internal virtual void OnMouseOver() { }
+        protected internal virtual void OnMouseDoubleClick() { }
+
+        internal void MouseOver()
+        {
+            OnMouseOver();
+        }
+
+        internal void MouseDown()
+        {
+            if (_IsClickTimerStarted)
+                OnMouseDoubleClick();
+            else
+            {
+                _ClickTimer.Start();
+                _IsClickTimerStarted = true;
+                OnMouseDown();
+            }
+        }
+
+        internal void MouseUp()
+        {
+            OnMouseUp();
+        }
     }
 }

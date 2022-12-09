@@ -10,9 +10,10 @@ namespace Solitaire
 {
     public class MainScene : Scene
     {
-        public MainScene() : base("Solitaire", new Vector2(1920, 1080), Color.BLACK, 60)
+        public MainScene() : base("Solitaire", new Vector2(1920, 1020), Color.BLACK, 60)
         {
             _IsInitialized = false;
+            TextObject.DefaultFont = "Kanit-Regular";
             Card.SetSize();
             var cardSpacing = new Vector2(30);
             var boardLength = 7 * Card.CardSize.X + 6 * cardSpacing.X;
@@ -20,29 +21,35 @@ namespace Solitaire
             var cardY = Card.CardSize.Y + cardSpacing.Y * 2;
 
             _Background = VideoService.GetTexture("background");
-            _Deck = new CardDeck(new Vector2(cardX, cardSpacing.Y));
-            _SuitPlaceholders = new Sprite[4]
+            _NewGameButton = new Button("button", () => ResetGame())
             {
-                new Sprite("card_placeholder")
+                Position = new Vector2(20f, 926f),
+                Text = new TextObject("NEW GAME")
                 {
-                    Position = new Vector2(cardX + (Card.CardSize.X + cardSpacing.X) * 3, cardSpacing.Y),
-                    Tint = new Color(255, 255, 255, 63)
+                    FontSize = 30,
+                    HorizontalAlignment = TextObject.Alignment.Center,
+                    VerticalAlignment = TextObject.Justification.Center,
                 },
-                new Sprite("card_placeholder")
+                ColorPalette = new()
                 {
-                    Position = new Vector2(cardX + (Card.CardSize.X + cardSpacing.X) * 4, cardSpacing.Y),
-                    Tint = new Color(255, 255, 255, 63)
+                    Regular = new Color(0, 41, 138, 255),
+                    Hover = new Color(9, 143, 253, 255),
+                    Click = new Color(197, 97, 0, 255),
+                    Disabled = new Color(127, 127, 127, 127),
                 },
-                new Sprite("card_placeholder")
+                TextColorPalette = new()
                 {
-                    Position = new Vector2(cardX + (Card.CardSize.X + cardSpacing.X) * 5, cardSpacing.Y),
-                    Tint = new Color(255, 255, 255, 63)
-                },
-                new Sprite("card_placeholder")
-                {
-                    Position = new Vector2(cardX + (Card.CardSize.X + cardSpacing.X) * 6, cardSpacing.Y),
-                    Tint = new Color(255, 255, 255, 63)
-                },
+                    Disabled = new Color(127, 127, 127, 127),
+                }
+            };
+
+            _Deck = new CardDeck(new Vector2(cardX, cardSpacing.Y));
+            _SuitStacks = new SuitStack[4]
+            {
+                new SuitStack(new Vector2(cardX + (Card.CardSize.X + cardSpacing.X) * 3, cardSpacing.Y)),
+                new SuitStack(new Vector2(cardX + (Card.CardSize.X + cardSpacing.X) * 4, cardSpacing.Y)),
+                new SuitStack(new Vector2(cardX + (Card.CardSize.X + cardSpacing.X) * 5, cardSpacing.Y)),
+                new SuitStack(new Vector2(cardX + (Card.CardSize.X + cardSpacing.X) * 6, cardSpacing.Y)),
             };
 
             // Initialize lanes.
@@ -54,14 +61,15 @@ namespace Solitaire
                 cardX += Card.CardSize.X + cardSpacing.X;
             }
 
-            StartCoroutine(DealDeck());
+            InitGame();
         }
 
         public const int LANE_COUNT = 7;
 
         private readonly Texture2D _Background;
         private readonly CardLane[] _Lanes;
-        private readonly Sprite[] _SuitPlaceholders;
+        private readonly SuitStack[] _SuitStacks;
+        private readonly Button _NewGameButton;
 
         /// <summary>
         /// Gets whether the scene is initialized.
@@ -98,6 +106,43 @@ namespace Solitaire
             }
 
             _IsInitialized = true;
+            _NewGameButton.IsEnabled = true;
+        }
+
+        public void ResetGame()
+        {
+            StopAllCoroutines();
+            Animation.StopAllAnimations();
+
+            foreach (var lane in _Lanes)
+            {
+                lane.Clear();
+            }
+
+            foreach (var lane in _SuitStacks)
+            {
+                lane.Clear();
+            }
+
+            _Deck.Clear();
+            InitGame();
+        }
+
+        public void InitGame()
+        {
+            _NewGameButton.IsEnabled = false;
+            _Deck.InitDeck();
+            StartCoroutine(DealDeck());
+        }
+
+        /// <summary>
+        /// Gets a suit stack that the card can be dropped onto.
+        /// </summary>
+        /// <param name="card">The card requesting to be dropped.</param>
+        /// <returns>A valid suit stack, or null if the card can't be legally dropped onto one.</returns>
+        public SuitStack? GetSuitStack(Card card)
+        {
+            return _SuitStacks.FirstOrDefault(s => s.CanAcceptCard(card));
         }
     }
 }

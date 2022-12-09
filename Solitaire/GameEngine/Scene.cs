@@ -117,14 +117,14 @@ namespace GameEngine
             // Mouse interaction.
             if (mouseHit != null)
             {
-                mouseHit.OnMouseOver();
+                mouseHit.MouseOver();
                 if (MouseService.IsButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
                 {
-                    mouseHit.OnMouseDown();
+                    mouseHit.MouseDown();
                 }
                 if (MouseService.IsButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
                 {
-                    mouseHit.OnMouseUp();
+                    mouseHit.MouseUp();
                 }
             }
 

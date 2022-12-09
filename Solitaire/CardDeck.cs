@@ -15,39 +15,21 @@ namespace Solitaire
     /// </summary>
     public class CardDeck : Sprite
     {
-        public CardDeck(Vector2 position) : base("card_back")
+        public CardDeck(Vector2 position) : base()
         {
             Position = position;
-
-            // Initialize cards.
-            var cards = new List<Card>();
-            for (int suit = 0; suit < 4; suit++)
-            {
-                for (int value = 0; value < 13; value++)
-                {
-                    var card = new Card((Card.CardSuit)suit, value + 1)
-                    {
-                        IsVisible = false,
-                        IsFaceDown = true,
-                        Position = position
-                    };
-
-                    cards.Add(card);
-                }
-            }
-
-            Cards = cards.OrderBy(c => Random.Shared.Next()).ToList();
+            InitDeck();
         }
 
-        private const int HAND_SIZE = 3;
-        private const float CARD_SPACING = 30f;
-        private const float CLICK_DELAY = 0.15f;
-        private const float CARD_DELAY = 0.05f;
+        public const int HAND_SIZE = 3;
+        public const float CARD_SPACING = 30f;
+        public const float CLICK_DELAY = 0.1f;
+        public const float CARD_DELAY = 0.05f;
 
         /// <summary>
         /// Gets the cards in the deck.
         /// </summary>
-        public List<Card> Cards { get; }
+        public List<Card> Cards { get; private set; }
 
         /// <summary>
         /// Gets the cards that are shown to the player.
@@ -69,13 +51,13 @@ namespace Solitaire
 
         protected internal override void OnMouseDown()
         {
-            if (!((MainScene)Scene.ActiveScene).IsInitialized || !_CanClick) return;
+            if (!((MainScene)Scene.ActiveScene).IsInitialized || !_CanClick || !Cards.Any()) return;
 
             _CanClick = false;
 
             if (VisibleCards.Count == Cards.Count)
             {
-                Scene.StartCoroutine(ResetDeck());
+                Scene.StartCoroutine(BringVisibleCardsBack());
             }
             else
             {
@@ -110,56 +92,83 @@ namespace Solitaire
             Scene.StartCoroutine(MoveTopCards(isShifting: true));
 
             // Cards won't always be shifted, may need to manually set CanGrab.
-            VisibleCards.Last().CanGrab = true;
+            if (VisibleCards.Any() )
+                VisibleCards.Last().CanGrab = true;
+        }
+
+        public void Clear()
+        {
+            VisibleCards.Clear();
+            foreach (var card in Cards)
+            {
+                card.Dispose();
+            }
+            Cards.Clear();
+        }
+
+        public void InitDeck()
+        {
+            SetTextureToDefault();
+            var cards = new List<Card>();
+            for (int suit = 0; suit < 4; suit++)
+            {
+                for (int value = 0; value < 13; value++)
+                {
+                    var card = new Card((Card.CardSuit)suit, value + 1)
+                    {
+                        IsVisible = false,
+                        IsFaceDown = true,
+                        Position = Position
+                    };
+
+                    cards.Add(card);
+                }
+            }
+
+            Cards = cards.OrderBy(c => Random.Shared.Next()).ToList();
         }
 
         private IEnumerator MoveTopCards(bool isShifting = false)
         {
-            if (VisibleCards.Count >= HAND_SIZE)
+            var lastCards = VisibleCards.TakeLast(HAND_SIZE).ToArray();
+            var cardCount = Math.Min(HAND_SIZE, VisibleCards.Count);
+
+            for (int i = 0; i < cardCount; i++)
             {
-                var lastCards = VisibleCards.TakeLast(HAND_SIZE).ToArray();
-                var cardX = Position.X + Card.CardSize.X;
+                var card = lastCards[isShifting ? lastCards.Length - i - 1 : i];
 
-                if (isShifting)
-                    cardX += HAND_SIZE * CARD_SPACING;
+                card.IsVisible = true;
+                card.IsFaceDown = false;
+                card.ZIndex = isShifting ? HAND_SIZE - i : i;
 
-                for (int i = 0; i < HAND_SIZE; i++)
-                {
-                    var card = lastCards[isShifting ? lastCards.Length - i - 1 : i];
+                card.Move(GetCardPosition(card), false);
 
-                    card.IsVisible = true;
-                    card.IsFaceDown = false;
-                    card.ZIndex = isShifting ? HAND_SIZE - i : i;
-
-                    if (i == HAND_SIZE - 1)
-                    {
-                        card.CanGrab = true;
-                    }
-
-                    if(!isShifting)
-                        cardX += CARD_SPACING;
-
-
-                    card.Move(new Vector2(cardX, Position.Y), false);
-
-                    if (isShifting)
-                        cardX -= CARD_SPACING;
-
-                    yield return new WaitForSeconds(CARD_DELAY);
-                }
-
-                yield return new WaitForSeconds(CLICK_DELAY);
-                _CanClick = true;
+                yield return new WaitForSeconds(CARD_DELAY);
             }
+
+            yield return new WaitForSeconds(CLICK_DELAY);
+            _CanClick = true;
+
+            if(VisibleCards.Any())
+                VisibleCards.Last().CanGrab = true;
         }
 
-        private IEnumerator ResetDeck()
+        public Vector2 GetCardPosition(Card card)
         {
-            TextureName = "card_back";
-            Tint = new Color(255, 255, 255, 255);
+            if (!VisibleCards.Contains(card)) throw new ArgumentOutOfRangeException(nameof(card));
+            // Default position is far right.
+            var cardX = Position.X + Card.CardSize.X + (Math.Min(HAND_SIZE, VisibleCards.Count) + 1) * CARD_SPACING;
+            cardX -= (CARD_SPACING * (VisibleCards.Count - VisibleCards.IndexOf(card)));
+            return new Vector2(cardX, Position.Y);
+        }
 
+        private IEnumerator BringVisibleCardsBack()
+        {
+            SetTextureToDefault();
             var lastCards = VisibleCards.TakeLast(HAND_SIZE).Reverse().ToArray();
-            for (int i = 0; i < HAND_SIZE; i++)
+            var cardCount = Math.Min(HAND_SIZE, VisibleCards.Count);
+
+            for (int i = 0; i < cardCount; i++)
             {
                 var card = lastCards[i];
                 card.IsVisible = true;
@@ -183,6 +192,12 @@ namespace Solitaire
 
             yield return new WaitForSeconds(CLICK_DELAY);
             _CanClick = true;
+        }
+
+        private void SetTextureToDefault()
+        {
+            TextureName = "card_back";
+            Tint = new Color(255, 255, 255, 255);
         }
     }
 }

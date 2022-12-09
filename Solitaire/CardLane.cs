@@ -35,19 +35,33 @@ namespace Solitaire
             card.IsVisible = true;
             card.OwnerStack = this;
 
-            card.Move(GetNextCardPosition(), resetZIndex: false);
+            card.Move(GetCardPosition(), resetZIndex: false);
             Stack.Push(card);
         }
 
-        public override Vector2 GetNextCardPosition()
+        public override Vector2 GetCardPosition(Card? card = null)
         {
-            return Position + Stack.Count * new Vector2(0, VERTICAL_SPACING);
+            var idx = Stack.Count;
+            if(card != null)
+            {
+                var allCards = Stack.ToList();
+                if (!allCards.Contains(card)) throw new ArgumentOutOfRangeException(nameof(card));
+                idx = Stack.Count - allCards.IndexOf(card) - 1;
+            }
+            return Position + idx * new Vector2(0, VERTICAL_SPACING);
         }
 
         public override void RemoveCard(Card card)
         {
             if (!Stack.Contains(card)) throw new IndexOutOfRangeException();
-            while (Stack.Pop() != card) { }
+            Card? poppedCard = null;
+            do
+            {
+                poppedCard = Stack.Pop();
+                poppedCard.OwnerStack = null;
+            }
+            while (poppedCard != card);
+
             if (Stack.TryPeek(out var nextCard))
             {
                 nextCard.IsFaceDown = false;

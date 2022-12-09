@@ -1,5 +1,6 @@
 ﻿using GameEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -94,7 +95,6 @@ namespace Solitaire
         public bool CanGrab { get; set; }
 
         private Vector2? _MouseOffset = null;
-        private Vector2? _OriginalPosition = null;
         private int _OriginalZIndex;
 
         /// <summary>
@@ -119,13 +119,20 @@ namespace Solitaire
         /// <param name="resetZIndex">Whether the card's z-index should be reset.</param>
         public void Move(Vector2 location, bool resetZIndex = true)
         {
+            var originalCanGrab = CanGrab;
+            CanGrab = false;
             var _ = new Vector2Animation
             (
                 Position,
                 location,
                 (value) => Position = value,
                 MOVEMENT_TIME,
-                callback: resetZIndex ? (() => ZIndex = _OriginalZIndex) : null
+                callback: () =>
+                {
+                    CanGrab = originalCanGrab;
+                    if (resetZIndex)
+                        ZIndex = _OriginalZIndex;
+                }
             );
         }
 
@@ -142,7 +149,10 @@ namespace Solitaire
         {
             if (_MouseOffset != null)
             {
-                Position = MouseService.GetMouseCoordinates() - _MouseOffset.Value;
+                if(MouseService.IsButtonDown(Raylib_cs.MouseButton.MOUSE_BUTTON_LEFT))
+                    Position = MouseService.GetMouseCoordinates() - _MouseOffset.Value;
+                else
+                    ReleaseCard();
             }
         }
 
@@ -164,59 +174,101 @@ namespace Solitaire
             }
         }
 
-        protected internal override void OnMouseUp()
+        protected internal override void OnMouseDoubleClick()
         {
-            if (_MouseOffset == null) return;
+            var ms = (MainScene)Scene.ActiveScene;
+            if (OwnerStack?.Stack.Any() == true && OwnerStack.Stack.Peek() != this) return;
+            var validStack = ms.GetSuitStack(this);
+            if (validStack != null) SetDown(validStack);
+        }
+
+        private void ReleaseCard()
+        {
+
             if (OwnerStack != null)
             {
                 var allCards = OwnerStack.Stack.ToList();
                 var thisIdx = allCards.IndexOf(this);
-                for (int i = thisIdx; i >= 0; i--)
+                var dropDestination = GetDropDestination(thisIdx > 0);
+
+                if ((dropDestination ?? OwnerStack) != OwnerStack)
+                    OwnerStack.RemoveCard(this);
+
+                var cards = allCards.Take(thisIdx + 1).Reverse();
+                foreach (var card in cards)
                 {
-                    allCards[i].SetDown();
+                    card._MouseOffset = null;
                 }
+                Scene.StartCoroutine(SetStackDown(cards, dropDestination));
             }
             else
             {
-                SetDown();
+                var dropDestination = GetDropDestination();
+                _MouseOffset = null;
+                SetDown(dropDestination);
             }
-        }
-
-        private void MoveToNewStack(CardStack newOwner)
-        {
-            if (OwnerStack == null)
-            {
-                // This is the top card from the drawn hand.
-                ((MainScene)Scene.ActiveScene).Deck.RemoveTopCard();
-            }
-            else
-            {
-                OwnerStack.RemoveCard(this);
-            }
-
-            newOwner.AddCard(this);
         }
 
         private void PickUp(int zIndex)
         {
             _MouseOffset = MouseService.GetMouseCoordinates() - Position;
-            _OriginalPosition = Position;
             _OriginalZIndex = ZIndex;
             ZIndex = zIndex;
         }
 
-        private void SetDown()
+        private void SetDown(CardStack? dropDestination)
         {
-            var moved = false;
-            _MouseOffset = null;
+            var ms = (MainScene)Scene.ActiveScene;
+
+            if (dropDestination != null && dropDestination != OwnerStack)
+            {
+                if (ms.Deck.VisibleCards.Contains(this))
+                {
+                    // This is the top card from the drawn hand.
+                    ms.Deck.RemoveTopCard();
+                }
+                else if (OwnerStack != null)
+                {
+                    // OwnerStack may be null - bottom card of a multi-card drag.
+                    OwnerStack?.RemoveCard(this);
+                }
+
+                if (OwnerStack == null)
+                    dropDestination.AddCard(this);
+            }
+            else
+            {
+                var destination = OwnerStack != null
+                    ? OwnerStack.GetCardPosition(this)
+                    : ms.Deck.GetCardPosition(this);
+
+                Move(destination);
+            }
+        }
+
+        private IEnumerator SetStackDown(IEnumerable<Card> cards, CardStack? dropDestination)
+        {
+            foreach (var card in cards)
+            {
+                card.SetDown(dropDestination);
+                yield return new WaitForSeconds(CardDeck.CARD_DELAY);
+            }
+        }
+
+        private CardStack? GetDropDestination(bool isMultiStack = false)
+        {
             object? dropDestination = null;
             var validDrops = GetAllCollisions().Where(c =>
 
-                // Drop on card in lane.
-                c is Card card && card.OwnerStack != null && card.Color != Color && card.Value == Value + 1 && !card.IsFaceDown
+                // Drop on card onto lane.
+                c is Card card && card.OwnerStack?.Stack.Peek() == card && card.Color != Color && card.Value == Value + 1 && !card.IsFaceDown
 
                 // Or drop a king onto an empty lane
-                || c is CardLane lane && Value == 13).ToList();
+                || c is CardLane lane && !lane.Stack.Any() && Value == 13
+
+                // Or drop card onto suit stack.
+                || !isMultiStack && c is SuitStack suit && suit.CanAcceptCard(this)
+                ).ToList();
 
             // If multiple valid drops, pick one closest to the card's center.
             if (validDrops.Skip(1).Any())
@@ -224,28 +276,16 @@ namespace Solitaire
                 var center = GetCenter();
                 dropDestination = validDrops.Select(body => new { body, distance = Vector2.Distance(center, body.GetCenter()) })
                     .OrderBy(c => c.distance)
+                    .Select(c => c.body)
                     .First();
             }
             else dropDestination = validDrops.FirstOrDefault();
 
-            if (dropDestination != null)
-            {
-                if (dropDestination is Card card)
-                {
-                    MoveToNewStack(card.OwnerStack);
-                    moved = true;
-                }
-                else if (dropDestination is CardLane lane)
-                {
-                    MoveToNewStack(lane);
-                    moved = true;
-                }
-            }
-
-            if (!moved)
-            {
-                Move(_OriginalPosition.Value);
-            }
+            return dropDestination is Card c
+                ? c.OwnerStack
+                : dropDestination is CardStack stack
+                    ? stack
+                    : null;
         }
     }
 }
