@@ -1,5 +1,4 @@
-﻿using GameEngine;
-using System;
+﻿using System;
 using System.Linq;
 using System.Numerics;
 
@@ -19,11 +18,17 @@ namespace Solitaire
 
         public const float VERTICAL_SPACING = 45f;
 
+        /// <inheritdoc/>
         public override void AddCard(Card card)
         {
             AddCard(card, true);
         }
 
+        /// <summary>
+        /// Adds a card to the lane.
+        /// </summary>
+        /// <param name="card">The card to add.</param>
+        /// <param name="setFaceUp">Whether the card should be flipped up.</param>
         public void AddCard(Card card, bool setFaceUp)
         {
             card.ZIndex = Stack.Select(c => c.ZIndex).DefaultIfEmpty(0).Max(z => z) + 1;
@@ -39,6 +44,7 @@ namespace Solitaire
             Stack.Push(card);
         }
 
+        /// <inheritdoc/>
         public override Vector2 GetCardPosition(Card? card = null)
         {
             var idx = Stack.Count;
@@ -51,6 +57,7 @@ namespace Solitaire
             return Position + idx * new Vector2(0, VERTICAL_SPACING);
         }
 
+        /// <inheritdoc/>
         public override void RemoveCard(Card card)
         {
             if (!Stack.Contains(card)) throw new IndexOutOfRangeException();

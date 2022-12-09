@@ -42,6 +42,9 @@ namespace Solitaire
         /// <param name="card">The card for which the position should be retrieved.</param>
         public abstract Vector2 GetCardPosition(Card? card = null);
 
+        /// <summary>
+        /// Clears the deck and disposes of the cards.
+        /// </summary>
         public void Clear()
         {
             while (Stack.Count > 0)

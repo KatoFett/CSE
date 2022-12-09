@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Reflection;
 
 namespace Solitaire
 {
@@ -145,6 +144,7 @@ namespace Solitaire
             _CardSize = new Vector2(cardTexture.width, cardTexture.height);
         }
 
+        /// <inheritdoc/>
         protected internal override void Update()
         {
             if (_MouseOffset != null)
@@ -182,6 +182,9 @@ namespace Solitaire
             if (validStack != null) SetDown(validStack);
         }
 
+        /// <summary>
+        /// Released the card from the player's firm and manly grip.
+        /// </summary>
         private void ReleaseCard()
         {
 
@@ -209,13 +212,21 @@ namespace Solitaire
             }
         }
 
-        private void PickUp(int zIndex)
+        /// <summary>
+        /// Picks a card up to follow the mouse.
+        /// </summary>
+        /// <param name="newZIndex">The new Z-Index for the card.</param>
+        private void PickUp(int newZIndex)
         {
             _MouseOffset = MouseService.GetMouseCoordinates() - Position;
             _OriginalZIndex = ZIndex;
-            ZIndex = zIndex;
+            ZIndex = newZIndex;
         }
 
+        /// <summary>
+        /// Sets a card down onto a new lane or where it originated from.
+        /// </summary>
+        /// <param name="dropDestination">The new destination if any.</param>
         private void SetDown(CardStack? dropDestination)
         {
             var ms = (MainScene)Scene.ActiveScene;
@@ -246,6 +257,11 @@ namespace Solitaire
             }
         }
 
+        /// <summary>
+        /// Sets a stack of cards down onto a destination.
+        /// </summary>
+        /// <param name="cards">The cards to set down</param>
+        /// <param name="dropDestination">The new destination, if any.</param>
         private IEnumerator SetStackDown(IEnumerable<Card> cards, CardStack? dropDestination)
         {
             foreach (var card in cards)
@@ -255,6 +271,11 @@ namespace Solitaire
             }
         }
 
+        /// <summary>
+        /// Gets a <see cref="CardStack"/> under this card onto which this card may be dropped.
+        /// </summary>
+        /// <param name="isMultiStack">Whether this card is part of a stack that's being dragged.</param>
+        /// <returns>A valid <see cref="CardStack"/> drop, or null if none is found.</returns>
         private CardStack? GetDropDestination(bool isMultiStack = false)
         {
             object? dropDestination = null;

@@ -5,8 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Solitaire
 {
@@ -15,15 +13,34 @@ namespace Solitaire
     /// </summary>
     public class CardDeck : Sprite
     {
+        /// <summary>
+        /// Creates a new <see cref="CardDeck"/>.
+        /// </summary>
+        /// <param name="position">The position for the deck.</param>
         public CardDeck(Vector2 position) : base()
         {
             Position = position;
             InitDeck();
         }
 
+        /// <summary>
+        /// The amount of cards drawn at a time.
+        /// </summary>
         public const int HAND_SIZE = 3;
+
+        /// <summary>
+        /// The horizontal spacing between drawn cards.
+        /// </summary>
         public const float CARD_SPACING = 30f;
+
+        /// <summary>
+        /// The delay in seconds between clicks.
+        /// </summary>
         public const float CLICK_DELAY = 0.1f;
+
+        /// <summary>
+        /// The card animation delay.
+        /// </summary>
         public const float CARD_DELAY = 0.05f;
 
         /// <summary>
@@ -84,6 +101,9 @@ namespace Solitaire
             }
         }
 
+        /// <summary>
+        /// Removes the top card from the visible cards drawn.
+        /// </summary>
         public void RemoveTopCard()
         {
             var topCard = VisibleCards.Last();
@@ -96,6 +116,9 @@ namespace Solitaire
                 VisibleCards.Last().CanGrab = true;
         }
 
+        /// <summary>
+        /// Clears the deck and disposes the cards.
+        /// </summary>
         public void Clear()
         {
             VisibleCards.Clear();
@@ -106,6 +129,9 @@ namespace Solitaire
             Cards.Clear();
         }
 
+        /// <summary>
+        /// Initializes the deck with a new deck of cards.
+        /// </summary>
         public void InitDeck()
         {
             SetTextureToDefault();
@@ -128,6 +154,10 @@ namespace Solitaire
             Cards = cards.OrderBy(c => Random.Shared.Next()).ToList();
         }
 
+        /// <summary>
+        /// Moves the top cards from the deck onto the discard pile.
+        /// </summary>
+        /// <param name="isShifting">Whether the cards are already on the board and being shifted over one space.</param>
         private IEnumerator MoveTopCards(bool isShifting = false)
         {
             var lastCards = VisibleCards.TakeLast(HAND_SIZE).ToArray();
@@ -153,6 +183,12 @@ namespace Solitaire
                 VisibleCards.Last().CanGrab = true;
         }
 
+        /// <summary>
+        /// Gets the position for a visible card.
+        /// </summary>
+        /// <param name="card">The card whose position should be determined.</param>
+        /// <returns>A <see cref="Vector2"/> that is the position for the card.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The card is not visible in the discard pile.</exception>
         public Vector2 GetCardPosition(Card card)
         {
             if (!VisibleCards.Contains(card)) throw new ArgumentOutOfRangeException(nameof(card));
@@ -162,6 +198,9 @@ namespace Solitaire
             return new Vector2(cardX, Position.Y);
         }
 
+        /// <summary>
+        /// Returns all visible cards to the deck.
+        /// </summary>
         private IEnumerator BringVisibleCardsBack()
         {
             SetTextureToDefault();
@@ -194,6 +233,9 @@ namespace Solitaire
             _CanClick = true;
         }
 
+        /// <summary>
+        /// Sets the deck's texture to the default.
+        /// </summary>
         private void SetTextureToDefault()
         {
             TextureName = "card_back";

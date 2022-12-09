@@ -1,8 +1,6 @@
 ﻿using GameEngine;
 using Raylib_cs;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -89,6 +87,9 @@ namespace Solitaire
             base.Update();
         }
 
+        /// <summary>
+        /// Deals the deck onto the board.
+        /// </summary>
         IEnumerator DealDeck()
         {
             // Each lane gets i + 1 cards.
@@ -109,6 +110,9 @@ namespace Solitaire
             _NewGameButton.IsEnabled = true;
         }
 
+        /// <summary>
+        /// Resets the game and starts a new one.
+        /// </summary>
         public void ResetGame()
         {
             StopAllCoroutines();
@@ -128,6 +132,9 @@ namespace Solitaire
             InitGame();
         }
 
+        /// <summary>
+        /// Starts a game.
+        /// </summary>
         public void InitGame()
         {
             _NewGameButton.IsEnabled = false;

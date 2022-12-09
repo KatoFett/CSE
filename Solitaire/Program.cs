@@ -1,6 +1,4 @@
-﻿using Raylib_cs;
-
-namespace Solitaire
+﻿namespace Solitaire
 {
     internal class Program
     {
